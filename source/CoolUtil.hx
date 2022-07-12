@@ -5,7 +5,8 @@ import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
-#if sys
+import flixel.system.FlxSound;
+#if MODS_ALLOWED
 import sys.io.File;
 import sys.FileSystem;
 #else
@@ -16,31 +17,55 @@ using StringTools;
 
 class CoolUtil
 {
-	// [Difficulty name, Chart file suffix]
-	public static var difficultyStuff:Array<Dynamic> = [
-		['Easy', '-easy'],
-		['Normal', ''],
-		['Hard', '-hard']
-		['EX', '-EX'],
-		['erect', '-erect'],
+	public static var defaultDifficulties:Array<String> = [
+		'Easy',
+		'Normal',
+		'Hard'
+		'wendu',
+		'dami',
+		'david',
+		'codra',
 	];
+	public static var defaultDifficulty:String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
+
+	public static var difficulties:Array<String> = [];
+
+	inline public static function quantize(f:Float, snap:Float){
+		// changed so this actually works lol
+		var m:Float = Math.fround(f * snap);
+		trace(snap);
+		return (m / snap);
+	}
+	
+	public static function getDifficultyFilePath(num:Null<Int> = null)
+	{
+		if(num == null) num = PlayState.storyDifficulty;
+
+		var fileSuffix:String = difficulties[num];
+		if(fileSuffix != defaultDifficulty)
+		{
+			fileSuffix = '-' + fileSuffix;
+		}
+		else
+		{
+			fileSuffix = '';
+		}
+		return Paths.formatToSongPath(fileSuffix);
+	}
 
 	public static function difficultyString():String
 	{
-		return difficultyStuff[PlayState.storyDifficulty][0].toUpperCase();
+		return difficulties[PlayState.storyDifficulty].toUpperCase();
 	}
 
-	public static function boundTo(value:Float, min:Float, max:Float):Float {
-		var newValue:Float = value;
-		if(newValue < min) newValue = min;
-		else if(newValue > max) newValue = max;
-		return newValue;
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
+		return Math.max(min, Math.min(max, value));
 	}
 
 	public static function coolTextFile(path:String):Array<String>
 	{
 		var daList:Array<String> = [];
-		#if windows
+		#if MODS_ALLOWED
 		if(FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
 		#else
 		if(Assets.exists(path)) daList = Assets.getText(path).trim().split('\n');
@@ -53,7 +78,18 @@ class CoolUtil
 
 		return daList;
 	}
+	public static function listFromString(string:String):Array<String>
+	{
+		var daList:Array<String> = [];
+		daList = string.trim().split('\n');
 
+		for (i in 0...daList.length)
+		{
+			daList[i] = daList[i].trim();
+		}
+
+		return daList;
+	}
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
 		for(col in 0...sprite.frameWidth){
@@ -92,9 +128,11 @@ class CoolUtil
 
 	//uhhhh does this even work at all? i'm starting to doubt
 	public static function precacheSound(sound:String, ?library:String = null):Void {
-		if(!Assets.cache.hasSound(Paths.sound(sound, library))) {
-			FlxG.sound.cache(Paths.sound(sound, library));
-		}
+		Paths.sound(sound, library);
+	}
+
+	public static function precacheMusic(sound:String, ?library:String = null):Void {
+		Paths.music(sound, library);
 	}
 
 	public static function browserLoad(site:String) {
