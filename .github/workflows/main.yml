@@ -34,3 +34,44 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+name: "App Center"
+description: "GitHub Action that uploads artefacts for Visual Studio App Center"
+author: "Wojciech Zięba <@wzieba>"
+inputs:
+  appName:
+    description: "App name followed by username e.g. wzieba/Sample-App"
+    required: true
+  token:
+    description: "Upload token - you can get one from appcenter.ms/settings"
+    required: true
+  group:
+    description: "Distribution group"
+    required: true
+  file:
+    description: "Artefact to upload (.apk or .ipa)"
+    required: true
+  buildVersion:
+    description: "Build version parameter required for .zip, .msi, .pkg and .dmg files"
+    required: false
+  buildNumber:
+    description: "Build number parameter required for macOS .pkg and .dmg files"
+    required: false
+  releaseNotes:
+    description: "Release notes visible on release page"
+    required: false
+  gitReleaseNotes:
+    description: "Generate release notes based on the latest git commit"
+    required: false
+  notifyTesters:
+    description: "If true, send an email notification to the distribution group"
+    required: false
+  debug:
+    description: "If true, shows additional information from the action execution"
+    required: false
+    default: false
+branding:
+  color: "red"
+  icon: "send"
+runs:
+  using: "docker"
+  image: "Dockerfile"
